@@ -1,8 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
+import { Container, Row, Col, Nav } from 'react-bootstrap';
 import Todo from "./components/Todo";
-import Form from "./components/Form";
-import FilterButton from "./components/FilterButton";
+import MyForm from "./components/Form";
 import { nanoid } from "nanoid";
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 // https://developer.mozilla.org/en-US/docs/Learn/Tools_and_testing/Client-side_JavaScript_frameworks/React_interactivity_events_state
 function usePrevious(value) {
@@ -65,20 +66,19 @@ function App(props) {
       />
     ));
 
-  const filterList = FILTER_NAMES.map((name) => (
-    <FilterButton
-      key={name}
-      name={name}
-      isPressed={name === filter}
-      setFilter={setFilter}
-    />
-  ));
+  const navList = FILTER_NAMES.map((name) => (
+    <Nav.Link eventKey={name}>{name} ({tasks.filter(FILTER_MAP[name]).length})</Nav.Link>
+  ))
 
   const tasksNoun = taskList.length !== 1 ? "tasks" : "task";
   const headingText = `${taskList.length} ${tasksNoun} remaining`;
   const listHeadingRef = useRef(null);
   const prevTaskLength = usePrevious(tasks.length);
 
+  const handleSelect = (eventKey) => {
+    console.log(eventKey)
+    setFilter(eventKey)
+  }
   useEffect(() => {
     if (tasks.length - prevTaskLength === -1) {
       listHeadingRef.current.focus();
@@ -86,20 +86,37 @@ function App(props) {
   }, [tasks.length, prevTaskLength]);
 
   return (
-    <div className="todoapp stack-large">
-      <h1>TodoMatic</h1>
-      <Form addTask={addTask} />
-      <div className="filters btn-group stack-exception">{filterList}</div>
-      <h2 id="list-heading" tabIndex="-1" ref={listHeadingRef}>
-        {headingText}
-      </h2>
-      <ul
-        className="todo-list stack-large stack-exception"
-        aria-labelledby="list-heading"
-      >
-        {taskList}
-      </ul>
-    </div>
+    <Container className="todoapp stack-large">
+      <Row>
+        <Col xs={3}>
+          <Row>
+            <Col>
+              <h1>TodoMatic</h1>
+            </Col>
+          </Row>
+          <Row>
+          <Nav activeKey={filter} className="flex-column" onSelect={handleSelect}>
+            {navList}
+          </Nav>
+          </Row>
+        </Col>
+        <Col xs={9}>
+        <Row>
+          <Col>
+            <MyForm addTask={addTask} />
+          </Col>        
+        </Row>
+        <h2 id="list-heading" tabIndex="-1" ref={listHeadingRef}>
+          {headingText}
+        </h2>
+        <Row>
+          <Col>
+          {taskList}
+          </Col>
+        </Row>
+        </Col>
+      </Row>
+    </Container>
   );
 }
 
