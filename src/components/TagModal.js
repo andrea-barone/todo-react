@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useState } from "react";
 import { addTag, tagColors } from "../db";
 import { Button, Modal, InputGroup, Form, Row, Col } from 'react-bootstrap'
 
