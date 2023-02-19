@@ -1,7 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Container, Row, Col, Nav } from 'react-bootstrap';
+import { Container, Row, Col, Nav, Button } from 'react-bootstrap';
 import Todo from "./components/Todo";
 import MyForm from "./components/Form";
+import TagModal from "./components/TagModal"
+import { getTags, getFilters } from "./db";
 import { nanoid } from "nanoid";
 import 'bootstrap/dist/css/bootstrap.min.css';
 
@@ -14,18 +16,14 @@ function usePrevious(value) {
   return ref.current;
 }
 
-const FILTER_MAP = {
-  All: () => true,
-  Active: (task) => !task.completed,
-  Completed: (task) => task.completed,
-};
-
-const FILTER_NAMES = Object.keys(FILTER_MAP);
-
 function App(props) {
   const [tasks, setTasks] = useState(props.tasks);
-
+  const [tags, setTags] = useState(getTags())
+  const [filters, setFilters] = useState(getFilters())
   const [filter, setFilter] = useState("All");
+
+  const [showNewTagModal, setShowNewTagModal] = useState(false)
+  const FILTER_NAMES = Object.keys(filters);
 
   function addTask(name) {
     const newTask = { id: `todo-${nanoid()}`, name, completed: false };
@@ -53,12 +51,13 @@ function App(props) {
   }
 
   const taskList = tasks
-    .filter(FILTER_MAP[filter])
+    .filter(filters[filter])
     .map((task) => (
       <Todo
         key={task.id}
         id={task.id}
         name={task.name}
+        tags={task.tags}
         completed={task.completed}
         toggleTaskCompleted={toggleTaskCompleted}
         deleteTask={deleteTask}
@@ -67,7 +66,7 @@ function App(props) {
     ));
 
   const navList = FILTER_NAMES.map((name) => (
-    <Nav.Link eventKey={name}>{name} ({tasks.filter(FILTER_MAP[name]).length})</Nav.Link>
+    <Nav.Link eventKey={name}>{name} ({tasks.filter(filters[name]).length})</Nav.Link>
   ))
 
   const tasksNoun = taskList.length !== 1 ? "tasks" : "task";
@@ -85,6 +84,17 @@ function App(props) {
     }
   }, [tasks.length, prevTaskLength]);
 
+  const createNewTag = () => {
+    setShowNewTagModal(true)
+  }
+
+  const handleCloseNewTagModal = () => {
+    setTags(getTags())
+    setFilters(getFilters())
+    console.log(tags)
+    setShowNewTagModal(false)
+  }
+
   return (
     <Container className="todoapp stack-large">
       <Row>
@@ -97,6 +107,9 @@ function App(props) {
           <Row>
           <Nav activeKey={filter} className="flex-column" onSelect={handleSelect}>
             {navList}
+            <Button onClick={() => createNewTag()}>
+              Create new Tag!
+            </Button>
           </Nav>
           </Row>
         </Col>
@@ -116,6 +129,7 @@ function App(props) {
         </Row>
         </Col>
       </Row>
+      <TagModal show={showNewTagModal} handleClose={handleCloseNewTagModal}/>
     </Container>
   );
 }

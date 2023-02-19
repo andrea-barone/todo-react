@@ -1,6 +1,7 @@
 import React, { useRef, useState } from "react";
-import { Button, Form, Row, InputGroup } from 'react-bootstrap';
+import { Button, Form, Row, InputGroup, Col } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { getTags } from "../db";
 import { faTrash, faTag } from '@fortawesome/free-solid-svg-icons'
 
 export default function Todo(props) {
@@ -35,6 +36,16 @@ export default function Todo(props) {
           <FontAwesomeIcon icon={faTrash}/>
         </Button>
       </InputGroup>
+      <Row>
+        {
+          props.tags.map(t => {
+            const dbtag = getTags().find(tag => tag.name === t)
+            return (
+              <Col xs='auto' className='tag-label' style={{ backgroundColor: dbtag?.color }}>{t}</Col>
+            )
+          })
+        }
+      </Row>
     </Form>
   );
 
